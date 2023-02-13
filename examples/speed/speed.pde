@@ -21,8 +21,9 @@ void setup() {
 
   // Speed is set with the HPGL 'VS' instruction. This is a device-dependent velocity
   // in mm/sec. Some devices will cap this at the maximum possible (e.g.
-  // Roland DXY-1350A will limit VS to 42mm/sec). Check that value you're setting here
+  // Roland DXY-1350A will limit VS to 42cm/sec). Check that value you're setting here
   // is suitable for your plotter!!
+  // HP 7475A Default VS is 38.1 cm/sec, maximum is 127.9999 cm/sec
 
   for(int i = 0; i < lines; i++) {
      hpgl.setSpeed(i);

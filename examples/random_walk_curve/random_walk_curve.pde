@@ -9,6 +9,9 @@ void setup() {
   // HPGL (Roland DXY-1350A) coordinate ranges:
   // A4 : 11040 x 7721 (297 x 210 mm)
   // A3 : 16158 x 11040 (420 x 297 mm)
+  // HPGL (HP7475A) imperial coordinate ranges:
+  // A : 10365 x 7962 (8.5 x 11 in)
+  // B : 16640 x 10365 (11 x 17 in)
   
   size(1104, 772);
   
