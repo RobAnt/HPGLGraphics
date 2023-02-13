@@ -28,7 +28,7 @@ public class HPGLGraphics extends PGraphics {
 
   private boolean matricesAllocated = false;
   
-  private String size;  // paper size, A3 or A4 for now
+  private String size;  // paper size, A3, A4, A, B for now
   private int MATRIX_STACK_DEPTH = 32;
   private int transformCount = 0;
   private PMatrix2D transformStack[] = new PMatrix2D[MATRIX_STACK_DEPTH];
@@ -38,11 +38,19 @@ public class HPGLGraphics extends PGraphics {
   private int A4H =  7721;
   private int A3W = 16158;
   private int A3H = 11040;
+  private int AW = 10365;
+  private int AH =  7962;
+  private int BW = 16640;
+  private int BH = 10365;
   
   private int A4Wmm = 297;
   private int A4Hmm = 210;
   private int A3Wmm = 420;
   private int A3Hmm = 297;
+  private int AWmm = 279;
+  private int AHmm = 216;
+  private int BWmm = 432;
+  private int BHmm = 279;
       
   private char terminator = (char)3; // Label/text terminator;
   
@@ -77,17 +85,17 @@ public class HPGLGraphics extends PGraphics {
 	   System.out.println("##library.name## ##library.prettyVersion## by ##author##");
   }
     
-  /**
-   * This method sets the plotter output size. Used to scale the Processing sketch to
-   * match either A3 or A4 dimensions (only these supported now)
-   * 
-   * @example simple_demo
-   * @param size String: "A3" or "A4", depending on the intended plot size
-   */
   public void setCurveDetail(int d) {
     curveDetail = d;
   }
-  
+
+  /**
+   * This method sets the plotter output size. Used to scale the Processing sketch to
+   * match either A3, A4, A or B dimensions (only these supported now)
+   * 
+   * @example simple_demo
+   * @param size String: "A3", "A4", "A", or "B", depending on the intended plot size
+   */
   public void setPaperSize(String size) {
     this.size=size;
   }
@@ -399,6 +407,10 @@ public class HPGLGraphics extends PGraphics {
       W=A3W; H=A3H;
     } else if (this.size == "A4"){
       W=A4W; H=A4H;
+    } else if (this.size == "A"){
+      W=AW; H=AH;
+    } else if (this.size == "B"){
+      W=BW; H=BH;
     }
 
     // Assume width>height, i.e. always plotting in landscape orientation
@@ -421,6 +433,10 @@ public class HPGLGraphics extends PGraphics {
 	     W=A3W; H=A3H;
 	   } else if (this.size == "A4"){
 	     W=A4W; H=A4H;
+	   } else if (this.size == "A"){
+		 W=AW; H=AH;
+	   } else if (this.size == "B"){
+		 W=BW; H=BH;
 	   }
 	  
 	   this.transformMatrix.mult(new float[]{x,y}, xy);
@@ -653,15 +669,17 @@ public class HPGLGraphics extends PGraphics {
     double paperHeight=1.0;
     
     if (this.size == "A3") {
-      //sizecm_w=0.29;
-      //sizecm_h=0.38;
       paperWidth=A3Wmm;
       paperHeight=A3Hmm;
     } else if (this.size == "A4"){
-      //sizecm_w=0.19;
-      //sizecm_h=0.27;
       paperWidth=A4Wmm;
       paperHeight=A4Hmm;
+    } else if (this.size == "A"){
+      paperWidth=AWmm;
+      paperHeight=AHmm;
+    } else if (this.size == "B"){
+      paperWidth=BWmm;
+      paperHeight=BHmm;
     }
     
     //sizecm_w = (sizepx*paperWidth)/this.width/10;
