@@ -15,7 +15,19 @@ void setup() {
   // B : 16640 x 10365 (11 x 17 in)
   
   HPGLGraphics hpgl = (HPGLGraphics) createGraphics(width, height, HPGLGraphics.HPGL);
-  hpgl.setPaperSize("A4");
+  
+  //hpgl.setPaperSize("A4");  //Still Supported with one parameter but new options:
+  
+  // First parameter is paper size (as listed above)
+  // Second parameter is page orientation:
+  //    "LANDSCAPE" (default), "PORTRAIT", "AUTO" (maximizes based on dimension of the HPGLGraphics declaration
+  // Third parameter is the alignment on the page (Bottom/Center/Top Left/Center/Right):
+  //    "BL","BC","BR","TL","TC","TR","CL","CC","CR"
+  
+  //hpgl.setPaperSize("A4","LANDSCAPE","BL");  //is the default settings
+  
+  hpgl.setPaperSize("A","AUTO","CC");
+  
   hpgl.setPath("output.hpgl");
   
   // (most) things between begin- and endRecord are written to the .hpgl file

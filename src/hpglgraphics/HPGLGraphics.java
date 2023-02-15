@@ -29,6 +29,8 @@ public class HPGLGraphics extends PGraphics {
   private boolean matricesAllocated = false;
   
   private String size;  // paper size, A3, A4, A, B for now
+  private String orientation;  // default LANDSCAPE, also PORTRAIT, AUTO
+  private String alignment; // default BL, also BC, BR, TL, TC, TR, CL, CC, CR - sketch on plotted page.
   private int MATRIX_STACK_DEPTH = 32;
   private int transformCount = 0;
   private PMatrix2D transformStack[] = new PMatrix2D[MATRIX_STACK_DEPTH];
@@ -92,12 +94,38 @@ public class HPGLGraphics extends PGraphics {
   /**
    * This method sets the plotter output size. Used to scale the Processing sketch to
    * match either A3, A4, A or B dimensions (only these supported now)
-   * 
+   *  
    * @example simple_demo
    * @param size String: "A3", "A4", "A", or "B", depending on the intended plot size
+   *        orientation String: "LANDSCAPE" (default), PORTRAIT, AUTO (based on PGraphic)
+   *        alignment String: "BL" (Bottom Left - default), BC, BR, TL, TC, TR, CL, CC, CR.
    */
-  public void setPaperSize(String size) {
+  public void setPaperSize(String size) {  // overloaded to support old way of working
+	this.size=size;
+	this.orientation="LANDSCAPE";
+	this.alignment="BL"; 
+  }
+  
+  public void setPaperSize(String size, String orientation, String alignment) {
     this.size=size;
+    this.orientation="LANDSCAPE";
+    this.alignment="BL";
+    
+    if (orientation=="AUTO") {
+      if (this.width>=this.height) {
+    	this.orientation="LANDSCAPE";
+      } else {
+    	this.orientation="PORTRAIT";
+      }
+    } else if (orientation=="PORTRAIT") {
+      this.orientation=orientation;
+    }
+    
+    for (String s : new String[] {"BL","BC","BR","TL","TC","TR","CL","CC","CR"}) {
+      if (alignment==s) {
+    	this.alignment=alignment;
+      }
+    }
   }
   
   /**
@@ -157,11 +185,21 @@ public class HPGLGraphics extends PGraphics {
    	  file = new File(this.path);
   	 }
 	
-	   if (this.size == null) {
+	 if (this.size == null) {
 		    this.size="A4";
-		    System.out.println("setPaperSize undefined: defaulting to A4");
-   	}
-	
+		    System.out.println("setPaperSize Size undefined: defaulting to A4");
+   	 }
+
+	 if (this.orientation == null) {
+		    this.orientation="LANDSCAPE";
+		    System.out.println("setPaperSize Orientation undefined: defaulting to LANDSCAPE");
+	 }	 
+	    
+	 if (this.alignment == null) {
+		    this.orientation="BL";
+		    System.out.println("setPaperSize Alignment undefined: defaulting to BL");
+	 }	 	    
+	        
     if (writer == null) {
 	     try {
 	       writer = new PrintWriter(new FileWriter(file));
@@ -403,7 +441,7 @@ public class HPGLGraphics extends PGraphics {
    	double W=0.0;
    	double H=0.0;
     
-    if (this.size == "A3") {
+    if (this.size == "A3") {   // Landscape paper sizes
       W=A3W; H=A3H;
     } else if (this.size == "A4"){
       W=A4W; H=A4H;
@@ -412,9 +450,22 @@ public class HPGLGraphics extends PGraphics {
     } else if (this.size == "B"){
       W=BW; H=BH;
     }
-
-    // Assume width>height, i.e. always plotting in landscape orientation
-    double ratio = H/this.height;
+    
+    if (this.orientation=="PORTRAIT") {  //Change orientation
+    	double temp=W;
+    	W=H;
+    	H=temp;
+    }
+    
+    double pratio = W/H;
+    double dratio = (double) this.width/this.height;
+    
+    double ratio = 0;
+    if (pratio>=dratio) {
+      ratio = H/this.height;  // scale to fit height
+    } else {
+      ratio = W/this.width;  // scale to fit width  	
+    }
     xy1[0] = ratio * xy[0];
     xy1[1] = ratio * xy[1];
     
@@ -429,7 +480,7 @@ public class HPGLGraphics extends PGraphics {
 	   double W=0.0;
 	   double H=0.0;
 	    
-	   if (this.size == "A3") {
+	   if (this.size == "A3") {  //Landscape paper sizes
 	     W=A3W; H=A3H;
 	   } else if (this.size == "A4"){
 	     W=A4W; H=A4H;
@@ -438,7 +489,13 @@ public class HPGLGraphics extends PGraphics {
 	   } else if (this.size == "B"){
 		 W=BW; H=BH;
 	   }
-	  
+
+	   if (this.orientation=="PORTRAIT") { //Change orientation
+	     double temp=W;
+	     W=H;
+	     H=temp;
+	   }
+	   
 	   this.transformMatrix.mult(new float[]{x,y}, xy);
 	  
 	   for (int i = 0 ; i < xy.length; i++) {
@@ -446,12 +503,32 @@ public class HPGLGraphics extends PGraphics {
 	   }
 	  
 	   ret = scaleToPaper(ret);
-	   ret[1] = H-ret[1];
+	   
+	   char valignment=alignment.charAt(0);
+	   char halignment=alignment.charAt(1);
+	   
+	   double[] window = {this.width,this.height};
+	   window = scaleToPaper(window);
+	   
+	   if (halignment=='R') {
+		   ret[0]=W-window[0]+ret[0];
+	   } else if (halignment=='C') {
+		   ret[0]=(W-window[0])/2.0+ret[0];
+	   }
+
+
+	   if (valignment=='B') {
+		   ret[1]=H-window[1]+ret[1];
+	   } else if (halignment=='C') {
+		   ret[1]=(H-window[1])/2.0+ret[1];
+	   }
+
+	   ret[1] = H-ret[1]; // invert Y axis to adjust for Processing vs HPGL
 	   
 	   return ret;
   }
 
-  private double[] scaleWH(double w, double h){
+  private double[] scaleWH(double w, double h){  // alignment doesn't matter here
    	double[] wh = {w,h};
    	wh = scaleToPaper(wh);
    	return wh;
@@ -768,13 +845,21 @@ public class HPGLGraphics extends PGraphics {
   public void println(String what) {
     writer.println(what);
   }
-  
+
   private void writeHeader() {
-	writer.println("IN;SP1;");
+	if (this.orientation=="LANDSCAPE" ) {
+	  writer.println("IN;SP1;");
+	} else {
+	  writer.println("IN;RO90;IP;IW;SP1;");
+	}
   }
   
   private void writeFooter() {
-    writer.println("PA0,0;SP;");
+	if (this.orientation=="LANDSCAPE" ) {
+	  writer.println("PA0,0;SP;");
+	} else {
+	  writer.println("RO0;IP;IW;PA0,0;SP;");
+	}
   }
 
   // GENERAL METHODS
