@@ -37,8 +37,7 @@ Some additional methods are available for controlling the HPGL output. This incl
 ### Tips:
   * line() always finishes with Pen Up. To draw continuous joined lines without lifting the pen, use vertex() instead.
   * text() requires a fill to be plotted.  Text with stroke but no fill will render in the sketch but not plot. 
-To check your HPGL files, I recommend [hp2xx](https://www.gnu.org/software/hp2xx/)
-If using Windows, another option is the [CERN HPGL viewer](https://service-hpglview.web.cern.ch/service-hpglview/) 
+  * To check your HPGL files, I recommend [hp2xx](https://www.gnu.org/software/hp2xx/). If using Windows, another option is the [CERN HPGL viewer](https://service-hpglview.web.cern.ch/service-hpglview/) 
 
 This library was inspired by, and builds upon, these libraries:
   * [HPGL-Plotter](http://sjunnesson.github.io/HPGL-Plotter/)
